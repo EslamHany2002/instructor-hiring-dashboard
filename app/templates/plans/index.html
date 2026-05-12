@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 animate-fade-up">
+    <h3 class="fw-bold mb-0">Hiring Plans</h3>
+    <a href="{{ url_for('plans.create_plan') }}" class="btn btn-accent">
+        <i class="bi bi-plus-lg me-1"></i> New Plan
+    </a>
+</div>
+
+<div class="row g-4">
+    {% for plan in plans %}
+    <div class="col-md-6 col-lg-4 animate-fade-up delay-{{ loop.index }}">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="fw-bold">{{ plan.title }}</h5>
+                    {% if current_user.role == 'Admin' %}
+                    <div class="d-flex gap-1">
+                        <a href="{{ url_for('plans.edit_plan', id=plan.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Plan">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('plans.delete_plan', id=plan.id) }}" onsubmit="return confirm('Delete this plan?');">
+                            <button class="btn btn-sm btn-outline-danger" title="Delete Plan"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+                <p class="text-muted small mb-3">
+                    <i class="bi bi-calendar-event me-1"></i> {{ plan.start_date.strftime('%b %d') }} - {{ plan.end_date.strftime('%b %d, %Y') }}
+                </p>
+                
+                <h6 class="text-muted small">Requirements:</h6>
+                <ul class="list-unstyled mb-3">
+                    {% for pt in plan.plan_tracks %}
+                    <li class="small mb-1">
+                        <i class="bi bi-check-circle text-primary me-1"></i> {{ pt.track.name }}
+                        {% if pt.profile %}({{ pt.profile.name }}){% endif %}
+                        <span class="badge bg-primary bg-opacity-10 text-primary float-end">{{ pt.target_number }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="border-top pt-2">
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-muted">Assigned: <strong>{{ plan.assigned_instructors|length }}</strong></span>
+                        <span class="text-muted">Target: <strong>{{ plan.plan_tracks|sum(attribute='target_number') }}</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted py-5">
+        <i class="bi bi-clipboard2-data fs-1 d-block mb-2"></i>
+        No hiring plans created yet.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

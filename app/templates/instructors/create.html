@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <h3 class="fw-bold mb-4 animate-fade-up">Add New Instructor</h3>
+        <div class="card p-4 animate-fade-up delay-1">
+            <form method="POST">
+                <!-- Basic Info -->
+                <h5 class="text-muted mb-3">Basic Information</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Instructor ID</label>
+                        <input type="text" name="instructor_id" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Phone</label>
+                        <input type="text" name="phone" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Instructor Status</label>
+                        <select name="status" class="form-select">
+                            <option value="New" selected>New</option>
+                            <option value="Current">Current</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">CV URL</label>
+                        <input type="url" name="cv_url" class="form-control" placeholder="https://...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Video URL</label>
+                        <input type="url" name="video_url" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+
+                <!-- Tracks & Profiles -->
+                <h5 class="text-muted mb-3">Tracks & Profiles</h5>
+                <div class="row g-3 mb-4">
+                    {% for i in range(1, 4) %}
+                    <div class="col-md-4">
+                        <label class="form-label">Track {{ i }} {% if i > 1 %}(Optional){% endif %}</label>
+                        <select name="track_{{ i }}" id="track_{{ i }}" class="form-select">
+                            <option value="">Select Track...</option>
+                            {% for track in tracks %}
+                            <option value="{{ track.id }}">{{ track.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Profile {{ i }}</label>
+                        <select name="profile_{{ i }}" id="profile_{{ i }}" class="form-select" disabled>
+                            <option value="">Select Profile...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        {% if i == 1 %}<span class="text-muted">Primary</span>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Evaluation & HR -->
+                <h5 class="text-muted mb-3">Evaluation & Employment</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">Rate/Hour (EGP)</label>
+                        <input type="number" name="rate_per_hour" class="form-control" step="0.01">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Employment Type</label>
+                        <select name="employment_type" class="form-select">
+                            <option value="">Select...</option>
+                            <option>Full Time</option>
+                            <option>Part Time</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Business Type</label>
+                        <select name="business_type" class="form-select">
+                            <option value="">Select...</option>
+                            <option>B2B</option>
+                            <option>B2C</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Technical Feedback</label>
+                        <select name="technical_feedback" class="form-select">
+                            <option value="">Select...</option>
+                            <option>Strong</option>
+                            <option>Average</option>
+                            <option>Weak</option>
+                            <option>Needs Improvement</option>
+                            <option>Not Relevant</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">First Approval</label>
+                        <select name="first_approval" class="form-select">
+                            <option value="">Select...</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                            <option>Pending</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Second Approval</label>
+                        <select name="second_approval" class="form-select">
+                            <option value="">Select...</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                            <option>Pending</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Review Date</label>
+                        <input type="date" name="review_date" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Reviewer</label>
+                        <input type="text" name="reviewer_name" class="form-control" value="Mohamed Gomaa">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Assign to Hiring Plan</label>
+                        <select name="plan_id" class="form-select">
+                            <option value="">-- No Plan (Unassigned) --</option>
+                            {% for plan in plans %}
+                            <option value="{{ plan.id }}">{{ plan.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Notes</label>
+                        <textarea name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('instructors.list_instructors') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i>Save Instructor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- KPIs Row 1 -->
+<div class="row g-4 mb-4">
+    <div class="col-md-2 animate-fade-up delay-1">
+        <div class="kpi-card" style="background: var(--kpi-gradient-1);"><p><i class="bi bi-people-fill me-1"></i> Total</p><h3 id="kpi-total">0</h3></div>
+    </div>
+    <div class="col-md-2 animate-fade-up delay-2">
+        <div class="kpi-card" style="background: var(--kpi-gradient-2);"><p><i class="bi bi-check-circle-fill me-1"></i> Approved</p><h3 id="kpi-approved">0</h3></div>
+    </div>
+    <div class="col-md-2 animate-fade-up delay-3">
+        <div class="kpi-card" style="background: var(--kpi-gradient-3);"><p><i class="bi bi-x-circle-fill me-1"></i> Rejected</p><h3 id="kpi-rejected">0</h3></div>
+    </div>
+    <div class="col-md-2 animate-fade-up delay-4">
+        <div class="kpi-card" style="background: var(--kpi-gradient-4);"><p><i class="bi bi-hourglass-split me-1"></i> Pending</p><h3 id="kpi-pending">0</h3></div>
+    </div>
+    <div class="col-md-2 animate-fade-up delay-5">
+        <div class="kpi-card" style="background: linear-gradient(135deg, #2ec4b6 0%, #20a39e 100%);"><p><i class="bi bi-currency-dollar me-1"></i> Avg Rate</p><h3 id="kpi-rate">0</h3></div>
+    </div>
+    <div class="col-md-2 animate-fade-up delay-5">
+        <div class="kpi-card" style="background: linear-gradient(135deg, #ff9f1c 0%, #e07c24 100%);"><p><i class="bi bi-building me-1"></i> B2B / B2C</p><h3 id="kpi-b2b-b2c">0/0</h3></div>
+    </div>
+</div>
+<!-- Plans Progress Section -->
+<div class="row g-4 mb-4 animate-fade-up delay-2">
+    <div class="col-12">
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-clipboard2-check me-2 text-primary"></i>Hiring Plans Progress</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Plan Title</th>
+                            <th>Period</th>
+                            <th class="text-center">Target</th>
+                            <th class="text-center">Fulfilled (Approved)</th>
+                            <th class="text-center">Pending Review</th>
+                            <th class="text-center">Rejected</th>
+                            <th class="text-center">Gap</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plans-progress-body">
+                        <tr><td colspan="8" class="text-center text-muted">Loading plans...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Charts Row 1 -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8 animate-fade-up delay-2">
+        <div class="card p-4 h-100"><h5 class="fw-bold mb-3">Performance by Track</h5><div style="height: 350px;"><canvas id="chartTrackPerf"></canvas></div></div>
+    </div>
+    <div class="col-lg-4 animate-fade-up delay-3">
+        <div class="card p-4 h-100"><h5 class="fw-bold mb-3">Approval Distribution</h5><div style="height: 350px;"><canvas id="chartApprovalDist"></canvas></div></div>
+    </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-4 animate-fade-up delay-1">
+        <div class="card p-4 h-100"><h5 class="fw-bold mb-3">Track Distribution</h5><div style="height: 300px;"><canvas id="chartTrackDist"></canvas></div></div>
+    </div>
+    <div class="col-lg-4 animate-fade-up delay-2">
+        <div class="card p-4 h-100"><h5 class="fw-bold mb-3">B2B vs B2C by Track</h5><div style="height: 300px;"><canvas id="chartB2bB2c"></canvas></div></div>
+    </div>
+    <div class="col-lg-4 animate-fade-up delay-3">
+        <div class="card p-4 h-100"><h5 class="fw-bold mb-3">Profile Distribution</h5><div style="height: 300px;"><canvas id="chartProfileDist"></canvas></div></div>
+    </div>
+</div>
+
+<!-- Tables & Trend Row -->
+<div class="row g-4 mb-4">
+   <!-- استبدل الكارت ده -->
+    <div class="col-lg-8 animate-fade-up delay-1">
+        <div class="card p-4 h-100">
+            <h5 class="fw-bold mb-3">Daily Approval Trend</h5>
+            <div style="height: 350px;"><canvas id="chartDailyTrend"></canvas></div>
+        </div>
+    </div>
+    <div class="col-lg-4 animate-fade-up delay-2">
+        <div class="card p-4 h-100">
+            <h5 class="fw-bold mb-3">Pending Aging</h5>
+            <table class="table table-sm mb-0"><thead><tr><th>Duration</th><th class="text-end">Count</th></tr></thead><tbody id="aging-body"></tbody></table>
+            <hr>
+            <h5 class="fw-bold mb-3 mt-3">Cost Analysis</h5>
+            <table class="table table-sm mb-0"><thead><tr><th>Track</th><th class="text-end">Avg Rate</th></tr></thead><tbody id="cost-body"></tbody></table>
+        </div>
+    </div>
+</div>
+
+<!-- Leaderboard Row -->
+<div class="row g-4 mb-4">
+    <div class="col-6 animate-fade-up delay-1">
+        <div class="card p-4 h-100">
+            <h5 class="fw-bold mb-3">Performance by Business Type</h5>
+            <table class="table table-sm mb-0"><thead><tr><th>Type</th><th class="text-center">Total</th><th class="text-center">Approved</th><th class="text-end">Success %</th></tr></thead><tbody id="biz-body"></tbody></table>
+        </div>
+    </div>
+    <div class="col-6 animate-fade-up delay-2">
+        <div class="card p-4 h-100">
+            <h5 class="fw-bold mb-3"><i class="bi bi-trophy-fill text-warning me-2"></i>Top Instructors Leaderboard</h5>
+            <table class="table table-sm table-hover mb-0"><thead><tr><th>#</th><th>Name</th><th>Score</th><th class="text-end">Rate</th></tr></thead><tbody id="leaderboard-body"></tbody></table>
+        </div>
+    </div>
+</div>
+<!-- Track Status Row (Full Width) -->
+<div class="row g-4 mb-4">
+    <div class="col-12 animate-fade-up delay-1">
+        <div class="card p-4">
+            <h5 class="fw-bold mb-3">Instructor Status Distribution by Track</h5>
+            <div class="row g-4 align-items-center">
+                <!-- الـ Chart بياخد 8 من 12 (الجزء الأكبر) -->
+                <div class="col-lg-8">
+                    <div style="height: 350px;"><canvas id="chartTrackStatus"></canvas></div>
+                </div>
+                <!-- الجدول بياخد 4 من 12 (الجزء الصغير) -->
+                <div class="col-lg-4">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Track Name</th>
+                                <th class="text-center">New</th>
+                                <th class="text-center">Current</th>
+                            </tr>
+                        </thead>
+                        <tbody id="track-status-table-body">
+                            <tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

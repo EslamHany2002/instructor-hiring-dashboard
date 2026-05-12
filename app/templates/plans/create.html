@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h3 class="fw-bold mb-4 animate-fade-up">Create Hiring Plan</h3>
+        <div class="card p-4 animate-fade-up delay-1">
+            <form method="POST" id="planForm">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Plan Title *</label>
+                        <input type="text" name="title" class="form-control" required placeholder="e.g., Summer Intake 2025">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Start Date *</label>
+                        <input type="date" name="start_date" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">End Date *</label>
+                        <input type="date" name="end_date" class="form-control" required>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Track Requirements</h5>
+                    <button type="button" class="btn btn-sm btn-accent" onclick="addTrackRow()">
+                        <i class="bi bi-plus-circle me-1"></i> Add Track
+                    </button>
+                </div>
+
+                <div id="tracks-container">
+                    <!-- الصفوف هتتضاف هنا بالجافاسكربت -->
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ url_for('plans.list_plans') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i>Save Plan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// بيانات التراكات من الفلاسك
+const allTracks = {{ tracks_list | tojson }};
+let rowCount = 0;
+
+function addTrackRow() {
+    rowCount++;
+    const container = document.getElementById('tracks-container');
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-3 align-items-end track-row';
+    row.id = `row-${rowCount}`;
+    
+    row.innerHTML = `
+        <div class="col-md-1 text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.track-row').remove()"><i class="bi bi-x"></i></button>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small">Track</label>
+            <select name="track_ids[]" class="form-select form-select-sm plan-track-select" required>
+                <option value="">Select...</option>
+                ${allTracks.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small">Profile (Optional)</label>
+            <select name="profile_ids[]" class="form-select form-select-sm" disabled>
+                <option value="">Select Track First</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small">Target Instructors</label>
+            <input type="number" name="targets[]" class="form-control form-control-sm" value="1" min="1" required>
+        </div>
+    `;
+    container.appendChild(row);
+
+    // تشغيل الدروب داون للبروفايلات في الصف الجديد
+    setupPlanDropdown(row);
+}
+
+// دالة لربط التراك بالبروفايل داخل صفحة البلان
+function setupPlanDropdown(rowElement) {
+    const trackSelect = rowElement.querySelector('.plan-track-select');
+    const profileSelect = rowElement.querySelector('select[name="profile_ids[]"]');
+
+    trackSelect.addEventListener('change', function() {
+        profileSelect.innerHTML = '<option value="">Select Profile...</option>';
+        if (this.value) {
+            profileSelect.removeAttribute('disabled');
+            fetch(`/api/lookups/profiles/${this.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.textContent = p.name;
+                        profileSelect.appendChild(opt);
+                    });
+                });
+        } else {
+            profileSelect.setAttribute('disabled', 'disabled');
+        }
+    });
+}
+
+// إضافة صف افتراضي لما الصفحة بتفتح
+document.addEventListener('DOMContentLoaded', () => addTrackRow());
+</script>
+{% endblock %}

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - HireBoard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- استدعاء متغيرات الثيم عشان يدعم الـ Dark Mode -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body, #f4f6f9);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            display: flex;
+            width: 900px;
+            height: 550px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Left Panel - تم تغيير الألوان لتطابق المشروع */
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        /* Decorative shapes */
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            top: -50px;
+            right: -80px;
+        }
+
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            bottom: 100px;
+            left: -60px;
+        }
+
+        /* Topographic lines */
+        .topo-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .topo-lines svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .topo-lines svg.top-left {
+            top: 0;
+            left: 0;
+            width: 40%;
+            height: 40%;
+        }
+
+        .topo-lines svg.bottom-right {
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            height: 50%;
+        }
+
+        /* Decorative elements */
+        .deco-plus {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 24px;
+            font-weight: 300;
+        }
+
+        .deco-plus.top { top: 40px; left: 50%; }
+        .deco-plus.bottom { bottom: 120px; left: 30%; }
+
+        .deco-circle {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+        }
+
+        .deco-circle.small {
+            width: 20px;
+            height: 20px;
+            top: 80px;
+            left: 60%;
+        }
+
+        .deco-circle.large {
+            width: 30px;
+            height: 30px;
+            bottom: 80px;
+            left: 15%;
+        }
+
+        .deco-dots {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            display: grid;
+            grid-template-columns: repeat(4, 6px);
+            gap: 8px;
+        }
+
+        .deco-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .left-content {
+            position: relative;
+            z-index: 2;
+            color: white;
+        }
+
+        .left-content h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .left-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.9;
+            max-width: 280px;
+        }
+
+        /* Right Panel - دعم الثيمات */
+        .right-panel {
+            flex: 1;
+            background: var(--bg-card, #ffffff);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            transition: background-color 0.3s ease;
+        }
+
+        .right-panel h2 {
+            font-size: 36px;
+            color: var(--text-primary, #2c3e50);
+            margin-bottom: 35px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border: 1.5px solid var(--border-color, #ddd);
+            border-radius: 30px;
+            font-size: 14px;
+            color: var(--text-primary, #555);
+            background-color: var(--input-bg, #ffffff);
+            outline: none;
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-secondary, #aaa);
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent, #4361ee);
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary, #bbb);
+            font-size: 14px;
+        }
+
+        .btn-signin {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 25px;
+        }
+
+        .btn-signin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .demo-info {
+            background-color: var(--input-bg, #f8f9fa);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color, #e0e6ed);
+        }
+        .demo-info p {
+            font-size: 12px;
+            color: var(--text-secondary, #666);
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .demo-info span {
+            font-size: 12px;
+            color: var(--text-primary, #333);
+            display: block;
+            margin-bottom: 3px;
+        }
+        .demo-info span strong {
+            color: var(--accent, #4361ee);
+        }
+
+        /* Theme Toggle Styling */
+        .theme-toggle-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                height: auto;
+            }
+
+            .left-panel {
+                padding: 40px;
+                min-height: 250px;
+            }
+
+            .left-content h1 {
+                font-size: 32px;
+            }
+
+            .right-panel {
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- زار التبديل للثيم -->
+    <div class="theme-toggle-wrapper">
+        <button class="theme-toggle" onclick="toggleTheme()"></button>
+    </div>
+
+    <div class="container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <!-- Decorative elements -->
+            <div class="deco-plus top">+</div>
+            <div class="deco-plus bottom">+</div>
+            <div class="deco-circle small"></div>
+            <div class="deco-circle large"></div>
+            <div class="deco-dots">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+            </div>
+
+            <!-- Topographic line decorations -->
+            <div class="topo-lines">
+                <svg class="top-left" viewBox="0 0 200 200" preserveAspectRatio="none">
+                    <path d="M0,20 Q30,10 50,30 T100,20 T150,40 T200,25" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,35 Q40,25 60,45 T110,35 T160,55 T200,40" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,50 Q50,40 70,60 T120,50 T170,70 T200,55" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,65 Q60,55 80,75 T130,65 T180,85 T200,70" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,80 Q70,70 90,90 T140,80 T190,100 T200,85" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                </svg>
+                <svg class="bottom-right" viewBox="0 0 300 250" preserveAspectRatio="none">
+                    <path d="M0,200 Q40,180 80,200 T160,180 T240,210 T300,190" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,180 Q50,160 90,180 T170,160 T250,190 T300,170" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,160 Q60,140 100,160 T180,140 T260,170 T300,150" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,140 Q70,120 110,140 T190,120 T270,150 T300,130" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,120 Q80,100 120,120 T200,100 T280,130 T300,110" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M0,100 Q90,80 130,100 T210,80 T290,110 T300,90" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                </svg>
+            </div>
+
+            <div class="left-content">
+                <h1>Welcome back!</h1>
+                <p>Sign in to access your Instructor Hiring Evaluation Dashboard.</p>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <!-- رسائل الخطأ من السيرفر -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; padding: 10px 15px; border-radius: 12px; margin-bottom: 20px; font-size: 14px;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <h2>Sign In</h2>
+            
+            <!-- ربط الفورم بالفلاسك -->
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" placeholder="Username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                
+                <button type="submit" class="btn-signin">Sign In</button>
+            </form>
+
+            
+        </div>
+    </div>
+
+    <!-- ملف الجافاسكربت بتاع الثيم -->
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+</html>

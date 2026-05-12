@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 animate-fade-up">
+    <h3 class="fw-bold mb-0">Instructors Registry</h3>
+    <div class="d-flex gap-2">
+        {% if current_user.role == 'Admin' %}
+        <a href="{{ url_for('instructors.export_instructors') }}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel-fill me-2"></i> Export to Excel
+        </a>
+        {% endif %}
+        <a href="{{ url_for('instructors.create_instructor') }}" class="btn btn-accent">
+            <i class="bi bi-plus-lg me-1"></i> Add New
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="card p-3 mb-4 animate-fade-up delay-1">
+    <form method="GET" action="{{ url_for('instructors.list_instructors') }}" class="row g-3 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text" style="background: var(--input-bg); border-color: var(--border-color); color: var(--text-secondary);"><i class="bi bi-search"></i></span>
+                <input type="text" name="q" class="form-control" placeholder="Search by Name or ID..." value="{{ search_term }}">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select name="track_id" class="form-select">
+                <option value="">Filter by Track (All)</option>
+                {% for track in tracks %}
+                <option value="{{ track.id }}" {% if track_filter == track.id %}selected{% endif %}>{{ track.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-accent flex-grow-1"><i class="bi bi-funnel me-1"></i> Apply</button>
+            <a href="{{ url_for('instructors.list_instructors') }}" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+        </div>
+    </form>
+</div>
+
+<!-- Instructors Table -->
+<div class="card animate-fade-up delay-2">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Tracks</th>
+                    <th>Business</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inst in instructors %}
+                <tr>
+                    <td>
+                        <span class="fw-bold">{{ inst.name }}</span>
+                        <br>
+                        {% if inst.status == 'Current' %}
+                            <span class="badge bg-info bg-opacity-10 text-info mt-1" style="font-size: 0.7rem;">CURRENT</span>
+                        {% else %}
+                            <span class="badge bg-success bg-opacity-10 text-success mt-1" style="font-size: 0.7rem;">NEW</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% for t in inst.tracks %}
+                            <span class="badge bg-primary bg-opacity-10 text-primary me-1">{{ t.track.name }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>{{ inst.business_type }}</td>
+                    <td>
+                        {% if inst.first_approval == 'Approved' %}
+                            <span class="badge bg-success bg-opacity-10 text-success">Approved</span>
+                        {% elif inst.first_approval == 'Pending' %}
+                            <span class="badge bg-warning bg-opacity-10 text-warning">Pending</span>
+                        {% elif inst.first_approval == 'Rejected' %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger">Rejected</span>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="score-badge">{{ inst.score }}</span></td>
+                    <td class="text-end">
+                        <!-- زرار العرض -->
+                        <a href="{{ url_for('instructors.view_instructor', id=inst.id) }}" class="btn btn-sm btn-outline-primary me-1" title="View Profile">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        
+                        {% if current_user.role == 'Admin' %}
+                        <a href="{{ url_for('instructors.edit_instructor', id=inst.id) }}" class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('instructors.delete_instructor', id=inst.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this instructor?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted small fst-italic">View Only</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        No instructors found matching your criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

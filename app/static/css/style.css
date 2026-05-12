@@ -1,0 +1,145 @@
+/* Animations */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-50px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-up { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+.animate-fade-in { animation: fadeIn 0.5s ease-out forwards; opacity: 0; }
+.animate-slide-left { animation: slideInLeft 0.5s ease-out forwards; opacity: 0; }
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* Layout Tweaks */
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+.navbar { 
+    box-shadow: var(--shadow-md); 
+    margin-bottom: 2rem; 
+    padding: 1rem 2rem;
+    border-radius: 0 0 16px 16px;
+}
+
+.card { 
+    border-radius: 16px; 
+    border: none; 
+    box-shadow: var(--shadow-sm); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+
+/* KPI Cards Specific */
+.kpi-card {
+    color: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+}
+.kpi-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.1);
+    transform: rotate(45deg);
+}
+.kpi-card h3 { font-size: 2rem; font-weight: 700; margin: 0; }
+.kpi-card p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
+
+/* Tables */
+.table thead th { 
+    border-bottom: 2px solid var(--border-color); 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    font-size: 0.8rem; 
+    letter-spacing: 0.5px; 
+}
+.table-hover tbody tr { transition: background-color 0.2s ease; }
+
+/* Buttons */
+.btn-accent {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.btn-accent:hover { background-color: var(--accent-hover); color: white; transform: scale(1.03); }
+.btn-success {
+    background-color: #198754 !important;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-success:hover {
+    background-color: #157347 !important;
+    color: #ffffff !important;
+    transform: scale(1.03);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+    width: 50px; height: 26px; border-radius: 13px;
+    background-color: var(--border-color); position: relative; cursor: pointer;
+    border: none; transition: background-color 0.3s ease;
+}
+.theme-toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background-color: white; transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .theme-toggle { background-color: var(--accent); }
+[data-theme="dark"] .theme-toggle::after { transform: translateX(24px); }
+
+/* Score Badge */
+.score-badge {
+    background: var(--kpi-gradient-1);.btn-success {
+    background-color: #198754 !important;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-success:hover {
+    background-color: #157347 !important;
+    color: #ffffff !important;
+    transform: scale(1.03);
+}
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.dropdown-item:hover { background-color: var(--input-bg); color: var(--text-primary); }
+.dropdown-menu { box-shadow: var(--shadow-lg); border-radius: 12px; border: 1px solid var(--border-color); }

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h3 class="fw-bold mb-4 animate-fade-up">Edit Hiring Plan</h3>
+        <div class="card p-4 animate-fade-up delay-1">
+            <form method="POST" id="planForm">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Plan Title *</label>
+                        <input type="text" name="title" class="form-control" value="{{ plan.title }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Start Date *</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ plan.start_date }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">End Date *</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ plan.end_date }}" required>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Track Requirements</h5>
+                    <button type="button" class="btn btn-sm btn-accent" onclick="addTrackRow()">
+                        <i class="bi bi-plus-circle me-1"></i> Add Track
+                    </button>
+                </div>
+
+                <div id="tracks-container">
+                    <!-- الصفوف هتتضاف هنا بالجافاسكربت -->
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ url_for('plans.list_plans') }}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i>Update Plan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+const allTracks = {{ tracks_list | tojson }};
+const existingTracks = {{ plan_tracks | tojson }}; // جلب التراكات القديمة
+let rowCount = 0;
+
+function addTrackRow(trackId = null, profileId = null, target = 1) {
+    rowCount++;
+    const container = document.getElementById('tracks-container');
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-3 align-items-end track-row';
+    row.id = `row-${rowCount}`;
+    
+    row.innerHTML = `
+        <div class="col-md-1 text-end">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.track-row').remove()"><i class="bi bi-x"></i></button>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small">Track</label>
+            <select name="track_ids[]" class="form-select form-select-sm plan-track-select" required>
+                <option value="">Select...</option>
+                ${allTracks.map(t => `<option value="${t.id}" ${t.id == trackId ? 'selected' : ''}>${t.name}</option>`).join('')}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small">Profile (Optional)</label>
+            <select name="profile_ids[]" class="form-select form-select-sm" ${!trackId ? 'disabled' : ''}>
+                <option value="">Select Track First</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small">Target Instructors</label>
+            <input type="number" name="targets[]" class="form-control form-control-sm" value="${target}" min="1" required>
+        </div>
+    `;
+    container.appendChild(row);
+
+    // تشغيل الـ Dropdown
+    setupPlanDropdown(row, profileId);
+}
+
+function setupPlanDropdown(rowElement, profileIdToSelect = null) {
+    const trackSelect = rowElement.querySelector('.plan-track-select');
+    const profileSelect = rowElement.querySelector('select[name="profile_ids[]"]');
+
+    trackSelect.addEventListener('change', function() {
+        profileSelect.innerHTML = '<option value="">Select Profile...</option>';
+        if (this.value) {
+            profileSelect.removeAttribute('disabled');
+            fetch(`/api/lookups/profiles/${this.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.textContent = p.name;
+                        profileSelect.appendChild(opt);
+                    });
+                });
+        } else {
+            profileSelect.setAttribute('disabled', 'disabled');
+        }
+    });
+    
+    // لو في تراك محتال من الأول (في حالة التعديل)، نعمل fetch فوراً للبروفايلات
+    if (trackSelect.value && profileIdToSelect) {
+        fetch(`/api/lookups/profiles/${trackSelect.value}`)
+            .then(res => res.json())
+            .then(data => {
+                profileSelect.innerHTML = '<option value="">Select Profile...</option>';
+                data.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.name;
+                    if (p.id == profileIdToSelect) opt.selected = true; // تحديد البروفايل القديم
+                    profileSelect.appendChild(opt);
+                });
+                profileSelect.removeAttribute('disabled');
+            });
+    }
+}
+
+// عند فتح الصفحة: نضيف الصفوف القديمة اللي كانت موجودة في الخطة
+document.addEventListener('DOMContentLoaded', () => {
+    if (existingTracks.length === 0) {
+        addTrackRow(); // لو مفيش تراكات ضف صف فاضي
+    } else {
+        existingTracks.forEach(t => {
+            addTrackRow(t.track_id, t.profile_id, t.target);
+        });
+    }
+});
+</script>
+{% endblock %}

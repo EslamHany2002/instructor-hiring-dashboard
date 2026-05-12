@@ -1,0 +1,151 @@
+/* ==========================================
+   1. Light Theme Variables (Default)
+   ========================================== */
+:root {
+    --bg-body: #f4f6f9;
+    --bg-card: #ffffff;
+    --bg-nav: #ffffff;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --border-color: #e0e6ed;
+    --accent: #4361ee;
+    --accent-hover: #3f37c9;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --input-bg: #f8f9fa;
+    --table-stripe: #f8f9fa;
+    --kpi-gradient-1: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+    --kpi-gradient-2: linear-gradient(135deg, #4cc9f0 0%, #4895ef 100%);
+    --kpi-gradient-3: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
+    --kpi-gradient-4: linear-gradient(135deg, #7209b7 0%, #560bad 100%);
+}
+
+/* ==========================================
+   2. Dark Theme Variables
+   ========================================== */
+[data-theme="dark"] {
+    --bg-body: #0f172a;
+    --bg-card: #1e293b;
+    --bg-nav: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --accent: #818cf8;
+    --accent-hover: #6366f1;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+    --input-bg: #334155;
+    --table-stripe: #253347;
+    --kpi-gradient-1: linear-gradient(135deg, #3f37c9 0%, #240085 100%);
+    --kpi-gradient-2: linear-gradient(135deg, #4895ef 0%, #2a6f97 100%);
+    --kpi-gradient-3: linear-gradient(135deg, #c2185b 0%, #880e4f 100%);
+    --kpi-gradient-4: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+}
+
+/* ==========================================
+   3. Force Theme Colors on ALL Elements
+   ========================================== */
+body {
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* سيطر على كل العناصر النصية عشان Bootstrap ما يغلبش علينا */
+h1, h2, h3, h4, h5, h6, p, span, div, li, td, th, label, small, strong, b {
+    color: var(--text-primary) !important;
+}
+
+/* لون النصوص الثانوية */
+.text-muted, .small, .text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* لون الروابط */
+a {
+    color: var(--accent) !important;
+}
+a:hover {
+    color: var(--accent-hover) !important;
+}
+
+/* ==========================================
+   4. Components Styling
+   ========================================== */
+.card, .navbar, .modal-content {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.form-control, .form-select {
+    background-color: var(--input-bg) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
+/* لون النص اللي جوا الـ Dropdown (Options) */
+.form-select option {
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.table {
+    --bs-table-bg: var(--bg-card);
+    --bs-table-striped-bg: var(--table-stripe);
+    --bs-table-hover-bg: var(--table-stripe);
+    border-color: var(--border-color);
+}
+
+/* مفيش مشكلة لو الـ Badge لونه ثابت عشان ده شكل可视化 */
+/* لكن لو في Badge لونه مكتوب كـ text مش bg، هيبقى لونه أساسي */
+.badge.bg-primary.bg-opacity-10 { color: var(--accent) !important; }
+.badge.bg-success.bg-opacity-10 { color: #4cc9f0 !important; }
+.badge.bg-danger.bg-opacity-10 { color: #f72585 !important; }
+.badge.bg-warning.bg-opacity-10 { color: #f8961e !important; }
+.badge.bg-info.bg-opacity-10 { color: #4cc9f0 !important; }
+
+/* الـ Dropdown Menu في الـ Navbar */
+.dropdown-menu {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-lg);
+    border-radius: 12px;
+}
+.dropdown-item {
+    color: var(--text-secondary) !important;
+}
+.dropdown-item:hover {
+    background-color: var(--input-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Alert Messages */
+.alert {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.btn-accent {
+    background-color: var(--accent) !important;
+    color: #ffffff !important; /* ده السطر المهم عشان الكلام يبان أبيض */
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-decoration: none; /* إزالة خط تحت الروابط */
+    display: inline-block;
+}
+.btn-accent:hover {
+    background-color: var(--accent-hover) !important;
+    color: #ffffff !important; /* لما الماوس يوقف عليه كمان يفضل أبيض */
+    transform: scale(1.03);
+}
