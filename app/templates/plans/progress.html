@@ -70,12 +70,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // تحديث الجدول الأول (Progress)
         fetch(`/dashboard/api/plans-progress${query}`).then(r=>r.json()).then(data => {
+            const plans = data.plans;
+            const totals = data.totals;
             const tbody = document.getElementById('progress-table-body');
-            if(!data.length) { tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">No data.</td></tr>'; return; }
-            tbody.innerHTML = data.map(p => {
-                // Progress Bar للإجمالي
+            if(!plans.length) { tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">No data.</td></tr>'; return; }
+            
+            let html = plans.map(p => {
                 let mainBarColor = p.percentage >= 100 ? 'bg-success' : (p.percentage >= 50 ? 'bg-warning' : 'bg-danger');
-                // Progress Bar للـ Approved
                 let appBarColor = p.approved_progress >= 100 ? 'bg-success' : (p.approved_progress >= 50 ? 'bg-warning' : 'bg-danger');
                 
                 return `<tr>
@@ -95,8 +96,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                 </tr>`;
             }).join('');
+            
+            // إضافة سطر الإجماليات
+            if (totals) {
+                let totalBarColor = totals.percentage >= 100 ? 'bg-success' : (totals.percentage >= 50 ? 'bg-warning' : 'bg-danger');
+                html += `
+                    <tr style="background-color: var(--input-bg); font-weight: 700; border-top: 2px solid var(--border-color) !important;">
+                        <td>TOTAL</td><td></td>
+                        <td class="text-center"><span class="badge bg-light text-dark">${totals.target}</span></td>                        
+                        <td class="text-center">${totals.actual}</td>
+                        <td class="text-center text-success">${totals.approved}</td>
+                        <td class="text-center text-warning">${totals.pending}</td>
+                        <td class="text-center text-danger">${totals.rejected}</td>
+                        <td class="text-center text-danger">${totals.gap > 0 ? totals.gap : '<i class="bi bi-check-circle-fill text-success"></i>'}</td>
+                        <td style="min-width: 150px;"><div class="progress" style="height: 8px;"><div class="progress-bar ${totalBarColor}" style="width: ${totals.percentage}%"></div></div><small class="text-muted">${totals.percentage}%</small></td>
+                        <td style="min-width: 150px;"></td>
+                    </tr>`;
+            }
+            
+            tbody.innerHTML = html;
         });
-
         // تحديث الجدول الثاني (Breakdown)
         fetch(`/dashboard/api/plans-detailed-breakdown${query}`).then(r=>r.json()).then(data => {
             const tbody = document.getElementById('breakdown-table-body');

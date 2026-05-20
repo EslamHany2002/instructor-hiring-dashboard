@@ -251,32 +251,53 @@ function initDashboard() {
     
     // Plans Progress Table
     fetch('/dashboard/api/plans-progress').then(r=>r.json()).then(data => {
+        const plans = data.plans;
+        const totals = data.totals;
         const tbody = document.getElementById('plans-progress-body');
-        if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No active hiring plans.</td></tr>'; return; }
-        tbody.innerHTML = data.map(p => {
-            let barColor = 'bg-danger';
-            if(p.percentage >= 100) barColor = 'bg-success';
-            else if(p.percentage >= 50) barColor = 'bg-warning';
+        
+        if(!plans.length) { tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No active hiring plans.</td></tr>'; return; }
+        
+        let html = plans.map(p => {
+            let barColor = p.percentage >= 100 ? 'bg-success' : (p.percentage >= 50 ? 'bg-warning' : 'bg-danger');
+            let appBarColor = p.approved_progress >= 100 ? 'bg-success' : (p.approved_progress >= 50 ? 'bg-warning' : 'bg-danger');
+            
             return `<tr>
-                <td class="fw-bold">${p.title}</td>
-                <td class="text-muted small">${p.start_date}</td>
+                <td class="fw-bold">${p.title}</td><td class="text-muted small">${p.start_date}</td>
                 <td class="text-center"><span class="badge bg-primary bg-opacity-10 text-primary">${p.target}</span></td>
                 <td class="text-center fw-bold">${p.actual}</td>
-                <td class="text-center fw-bold text-success">${p.approved}</td>
+                <td class="text-center text-success fw-bold">${p.approved}</td>
                 <td class="text-center text-warning fw-bold">${p.pending}</td>
                 <td class="text-center text-danger fw-bold">${p.rejected}</td>
                 <td class="text-center text-danger fw-bold">${p.gap > 0 ? p.gap : '<i class="bi bi-check-circle-fill text-success"></i>'}</td>
                 <td style="min-width: 150px;"><div class="progress" style="height: 8px;"><div class="progress-bar ${barColor}" style="width: ${p.percentage}%"></div></div><small class="text-muted">${p.percentage}%</small></td>
-                <td>
+                <td style="min-width: 150px;">
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar ${p.approved_progress >= 100 ? 'bg-success' : (p.approved_progress >= 50 ? 'bg-warning' : 'bg-danger')}" style="width: ${p.approved_progress}%"></div>
+                        <div class="progress-bar ${appBarColor}" style="width: ${p.approved_progress}%"></div>
                     </div>
                     <small class="text-muted">${p.approved_progress}%</small>
                 </td>
             </tr>`;
         }).join('');
-    }).catch(err => console.error(err));
 
+        // إضافة سطر الإجماليات في الآخر لو مفيش فلتر
+        if (totals) {
+            let totalBarColor = totals.percentage >= 100 ? 'bg-success' : (totals.percentage >= 50 ? 'bg-warning' : 'bg-danger');
+            html += `
+                <tr style="background-color: var(--input-bg); font-weight: 700; border-top: 2px solid var(--border-color) !important;">
+                    <td>TOTAL</td><td></td>
+                    <td class="text-center"><span class="badge bg-light text-dark">${totals.target}</span></td>                    
+                    <td class="text-center">${totals.actual}</td>
+                    <td class="text-center text-success">${totals.approved}</td>
+                    <td class="text-center text-warning">${totals.pending}</td>
+                    <td class="text-center text-danger">${totals.rejected}</td>
+                    <td class="text-center text-danger">${totals.gap > 0 ? totals.gap : '<i class="bi bi-check-circle-fill text-success"></i>'}</td>
+                    <td style="min-width: 150px;"><div class="progress" style="height: 8px;"><div class="progress-bar ${totalBarColor}" style="width: ${totals.percentage}%"></div></div><small class="text-muted">${totals.percentage}%</small></td>
+                    <td style="min-width: 150px;"></td>
+                </tr>`;
+        }
+        
+        tbody.innerHTML = html;
+    }).catch(err => console.error(err));
         // Plans Detailed Granular Breakdown
     fetch('/dashboard/api/plans-detailed-breakdown').then(r=>r.json()).then(data => {
         const tbody = document.getElementById('plans-breakdown-body');

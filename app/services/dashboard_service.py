@@ -152,7 +152,7 @@ def get_plans_progress(plan_id=None):
             "start_date": plan.start_date.strftime('%b %d, %Y'),
             "target": total_target,
             "actual": actual_assigned,
-            "gap": total_target - actual_assigned,
+            "gap": total_target - total_approved,
             "percentage": round((actual_assigned / total_target) * 100, 1) if total_target > 0 else 0,
             "pending": total_pending,
             "rejected": total_rejected,

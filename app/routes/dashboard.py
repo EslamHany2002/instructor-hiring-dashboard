@@ -79,7 +79,23 @@ def api_aging_analysis():
 @login_required
 def api_plans_progress():
     plan_id = request.args.get('plan_id', type=int)
-    return jsonify(dashboard_service.get_plans_progress(plan_id))
+    plans_data = dashboard_service.get_plans_progress(plan_id)
+    
+    # حساب الإجماليات لكل الخطط (لو مفيش فلتر، يعني All Plans)
+    if not plan_id:
+        totals = {
+            "target": sum(p["target"] for p in plans_data),
+            "actual": sum(p["actual"] for p in plans_data),
+            "approved": sum(p["approved"] for p in plans_data),
+            "pending": sum(p["pending"] for p in plans_data),
+            "rejected": sum(p["rejected"] for p in plans_data),
+            "gap": sum(p["gap"] for p in plans_data),
+            "percentage": round((sum(p["actual"] for p in plans_data) / sum(p["target"] for p in plans_data)) * 100, 1) if sum(p["target"] for p in plans_data) > 0 else 0
+        }
+    else:
+        totals = None # لو فيه فلتر مش بنعرض الإجماليات
+        
+    return jsonify({"plans": plans_data, "totals": totals})
 
 @dashboard_bp.route('/api/track-status')
 @login_required
