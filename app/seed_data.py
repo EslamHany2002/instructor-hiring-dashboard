@@ -16,12 +16,12 @@ def seed_database():
     # Seed Tracks & Profiles if empty
     if Track.query.count() == 0:
         tracks_data = {
-            "AI": ["Data Scientist", "Machine Learning Engineer", "Data Engineer", "Generative AI Professional", "AI Agent Engineer"],
+            "AI": ["Data Scientist", "Machine Learning Engineer", "Data Engineer", "Generative AI Professional", "AI Agent Engineer", "AI for Developer", "AI Automation"],            
             "Cyber Security": ["Cyber Security Incident Response Analyst"],
-            "Software Development": ["Software Tester", "React Frontend Developer", "Mobile App Developer"],
+            "Software Development": ["Software Tester", "React Frontend Developer", "Mobile App Developer", ".NET Developer", "Full Stack PHP Diploma", "Full Stack Node.js Diploma", "Full Stack Python Diploma"],            
             "Data Analytics": ["Data Analyst", "Power BI Specialist"],
-            "Applied Technology": ["IoT Specialist", "Embedded Systems Engineer", "Linux Administrator", "Robotics Engineer", "Firmware Developer"]
-        }
+            "Applied Technology": ["IoT Specialist", "Embedded Systems Engineer", "Embedded Linux", "Robotics Engineer", "Firmware Developer"]        
+            }
 
         for track_name, profiles in tracks_data.items():
             track = Track(name=track_name)
