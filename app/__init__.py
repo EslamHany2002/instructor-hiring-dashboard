@@ -12,7 +12,17 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True)
     
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'super-secret-key-123')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///instructors.db')
+    # لو في رابط لنيون وصح (مش فاضي) استخدمه، غير كده استخدم الملف المحلي
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        # 1. نعمل مجلد instance لو مش موجود (عشان مفيش مشاكل فاضية)
+        os.makedirs(app.instance_path, exist_ok=True)
+        # 2. نحدد مسار الملف بالظبط داخل المجلد
+        db_path = os.path.join(app.instance_path, 'instructors.db')
+        # 3. نربط الفلاسك بيه
+        db_url = f'sqlite:///{db_path}'
+        
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)

@@ -25,6 +25,9 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard.view_dashboard') }}">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('instructors.list_instructors') }}">Instructors</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('plans.list_plans') }}">Hiring Plans</a></li>
+                    {% if current_user.role == 'Admin' %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('plans.view_progress') }}">Plans Progress</a></li>
+                    {% endif %}
                     
                     {% if current_user.role == 'Admin' %}
                     <li class="nav-item dropdown">

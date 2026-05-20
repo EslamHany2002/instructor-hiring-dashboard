@@ -138,3 +138,12 @@ def delete_plan(id):
     
     flash('Plan deleted.', 'info')
     return redirect(url_for('plans.list_plans'))
+
+@plans_bp.route('/progress')
+@login_required
+def view_progress():
+    if current_user.role != 'Admin':
+        flash('Access Denied.', 'danger')
+        return redirect(url_for('main.index'))
+    plans = HiringPlan.query.order_by(HiringPlan.created_at.desc()).all()
+    return render_template('plans/progress.html', plans=plans)

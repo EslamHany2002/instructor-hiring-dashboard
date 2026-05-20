@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 animate-fade-up">
+    <h3 class="fw-bold mb-0">Plans Progress & Breakdown</h3>
+    <!-- الفلاتر -->
+    <div class="d-flex align-items-center gap-3">
+        <select id="planFilter" class="form-select" style="width: 300px;">
+            <option value="">All Plans</option>
+            {% for plan in plans %}
+            <option value="{{ plan.id }}">{{ plan.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<!-- الجدول الأول: التقدم العام -->
+<div class="card p-4 mb-4 animate-fade-up delay-1">
+    <h5 class="fw-bold mb-3">Hiring Plans Progress</h5>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Plan Title</th>
+                    <th>Period</th>
+                    <th class="text-center">Target</th>
+                    <th class="text-center">Fulfilled</th>
+                    <th class="text-center text-success">Total Approved</th>
+                    <th class="text-center text-warning">Total Pending</th>
+                    <th class="text-center text-danger">Total Rejected</th>
+                    <th class="text-center">Gap</th>
+                    <th>Progress</th>
+                    <th style="min-width: 150px;">Approved Progress from Plan</th>
+                </tr>
+            </thead>
+            <tbody id="progress-table-body"><tr><td colspan="10" class="text-center text-muted">Loading...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- الجدول الثاني: التفصيلي -->
+<div class="card p-4 animate-fade-up delay-2">
+    <h5 class="fw-bold mb-3">Plans Granular Breakdown</h5>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Plan Name</th>
+                    <th>Required Track</th>
+                    <th>Profile</th>
+                    <th class="text-center">Target</th>
+                    <th class="text-center">Actual</th>
+                    <th class="text-center">Fulfillment Status</th>
+                    <th class="text-center text-success">Approved</th>
+                    <th class="text-center text-warning">Pending</th>
+                    <th class="text-center text-danger">Rejected</th>
+                </tr>
+            </thead>
+            <tbody id="breakdown-table-body"><tr><td colspan="9" class="text-center text-muted">Loading...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterSelect = document.getElementById('planFilter');
+    
+    function loadData() {
+        const planId = filterSelect.value;
+        const query = planId ? `?plan_id=${planId}` : '';
+        
+        // تحديث الجدول الأول (Progress)
+        fetch(`/dashboard/api/plans-progress${query}`).then(r=>r.json()).then(data => {
+            const tbody = document.getElementById('progress-table-body');
+            if(!data.length) { tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">No data.</td></tr>'; return; }
+            tbody.innerHTML = data.map(p => {
+                // Progress Bar للإجمالي
+                let mainBarColor = p.percentage >= 100 ? 'bg-success' : (p.percentage >= 50 ? 'bg-warning' : 'bg-danger');
+                // Progress Bar للـ Approved
+                let appBarColor = p.approved_progress >= 100 ? 'bg-success' : (p.approved_progress >= 50 ? 'bg-warning' : 'bg-danger');
+                
+                return `<tr>
+                    <td class="fw-bold">${p.title}</td><td class="text-muted small">${p.start_date}</td>
+                    <td class="text-center"><span class="badge bg-primary bg-opacity-10 text-primary">${p.target}</span></td>
+                    <td class="text-center fw-bold">${p.actual}</td>
+                    <td class="text-center text-success fw-bold">${p.approved}</td>
+                    <td class="text-center text-warning fw-bold">${p.pending}</td>
+                    <td class="text-center text-danger fw-bold">${p.rejected}</td>
+                    <td class="text-center text-danger fw-bold">${p.gap > 0 ? p.gap : '<i class="bi bi-check-circle-fill text-success"></i>'}</td>
+                    <td style="min-width: 150px;"><div class="progress" style="height: 8px;"><div class="progress-bar ${mainBarColor}" style="width: ${p.percentage}%"></div></div><small class="text-muted">${p.percentage}%</small></td>
+                    <td style="min-width: 150px;">
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar ${appBarColor}" style="width: ${p.approved_progress}%"></div>
+                        </div>
+                        <small class="text-muted">${p.approved_progress}%</small>
+                    </td>
+                </tr>`;
+            }).join('');
+        });
+
+        // تحديث الجدول الثاني (Breakdown)
+        fetch(`/dashboard/api/plans-detailed-breakdown${query}`).then(r=>r.json()).then(data => {
+            const tbody = document.getElementById('breakdown-table-body');
+            if(!data.length) { tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No breakdown data.</td></tr>'; return; }
+            
+            let html = "", currentPlan = "";
+            data.forEach(p => {
+                if (p.plan_title !== currentPlan) {
+                    currentPlan = p.plan_title;
+                    html += `<tr style="background-color: var(--input-bg);"><td colspan="9" class="fw-bold text-primary pt-3 pb-3" style="font-size: 0.95rem;"><i class="bi bi-folder2-open me-2"></i>${p.plan_title}</td></tr>`;
+                }
+                html += `<tr>
+                    <td></td><td class="fw-bold">${p.track_name}</td><td class="text-muted small">${p.profile_name}</td>
+                    <td class="text-center"><span class="badge bg-secondary bg-opacity-10 text-secondary">${p.target}</span></td>
+                    <td class="text-center"><span class="badge bg-primary bg-opacity-10 text-primary">${p.actual}</span></td>
+                    <td class="text-center"><span class="badge bg-${p.status_color} bg-opacity-10 text-${p.status_color} p-2">${p.status} (${p.actual}/${p.target})</span></td>
+                    <td class="text-center fw-bold">${p.approved}</td><td class="text-center fw-bold">${p.pending}</td><td class="text-center fw-bold">${p.rejected}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        });
+    }
+
+    loadData();
+    filterSelect.addEventListener('change', loadData);
+});
+</script>
+{% endblock %}

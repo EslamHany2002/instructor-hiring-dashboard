@@ -249,34 +249,77 @@ function initDashboard() {
         );
     });
     
-        // Plans Progress Table
+    // Plans Progress Table
     fetch('/dashboard/api/plans-progress').then(r=>r.json()).then(data => {
         const tbody = document.getElementById('plans-progress-body');
-        if(data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No active hiring plans.</td></tr>';
-            return;
-        }
+        if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No active hiring plans.</td></tr>'; return; }
         tbody.innerHTML = data.map(p => {
             let barColor = 'bg-danger';
             if(p.percentage >= 100) barColor = 'bg-success';
             else if(p.percentage >= 50) barColor = 'bg-warning';
-            
             return `<tr>
                 <td class="fw-bold">${p.title}</td>
                 <td class="text-muted small">${p.start_date}</td>
                 <td class="text-center"><span class="badge bg-primary bg-opacity-10 text-primary">${p.target}</span></td>
-                <td class="text-center fw-bold text-success">${p.actual}</td>
+                <td class="text-center fw-bold">${p.actual}</td>
+                <td class="text-center fw-bold text-success">${p.approved}</td>
                 <td class="text-center text-warning fw-bold">${p.pending}</td>
                 <td class="text-center text-danger fw-bold">${p.rejected}</td>
                 <td class="text-center text-danger fw-bold">${p.gap > 0 ? p.gap : '<i class="bi bi-check-circle-fill text-success"></i>'}</td>
-                <td style="min-width: 150px;">
+                <td style="min-width: 150px;"><div class="progress" style="height: 8px;"><div class="progress-bar ${barColor}" style="width: ${p.percentage}%"></div></div><small class="text-muted">${p.percentage}%</small></td>
+                <td>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar ${barColor}" style="width: ${p.percentage}%"></div>
+                        <div class="progress-bar ${p.approved_progress >= 100 ? 'bg-success' : (p.approved_progress >= 50 ? 'bg-warning' : 'bg-danger')}" style="width: ${p.approved_progress}%"></div>
                     </div>
-                    <small class="text-muted">${p.percentage}%</small>
+                    <small class="text-muted">${p.approved_progress}%</small>
                 </td>
             </tr>`;
         }).join('');
+    }).catch(err => console.error(err));
+
+        // Plans Detailed Granular Breakdown
+    fetch('/dashboard/api/plans-detailed-breakdown').then(r=>r.json()).then(data => {
+        const tbody = document.getElementById('plans-breakdown-body');
+        if(data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No plan requirements found.</td></tr>';
+            return;
+        }
+        
+        let currentPlan = "";
+        let html = "";
+        
+        data.forEach(p => {
+            // لو اسم الخطة تغير، نطبع سطر عنوان للخطة عشان نفصل بينهم (لو في أكتر من خطة)
+            if (p.plan_title !== currentPlan) {
+                currentPlan = p.plan_title;
+                html += `
+                    <tr style="background-color: var(--input-bg);">
+                        <td colspan="9" class="fw-bold text-primary pt-3 pb-3" style="font-size: 0.95rem;">
+                            <i class="bi bi-folder2-open me-2"></i>${p.plan_title}
+                        </td>
+                    </tr>`;
+            }
+            
+            // سطر البيانات
+            html += `
+                <tr>
+                    <td></td>
+                    <td class="fw-bold">${p.track_name}</td>
+                    <td class="text-muted small">${p.profile_name}</td>
+                    <td class="text-center"><span class="badge bg-secondary bg-opacity-10 text-secondary">${p.target}</span></td>
+                    <td class="text-center"><span class="badge bg-primary bg-opacity-10 text-primary">${p.actual}</span></td>
+                    <td class="text-center">
+                        <span class="badge bg-${p.status_color} bg-opacity-10 text-${p.status_color} p-2">
+                            ${p.status} (${p.actual}/${p.target})
+                        </span>
+                    </td>
+                    <td class="text-center fw-bold">${p.approved}</td>
+                    <td class="text-center fw-bold">${p.pending}</td>
+                    <td class="text-center fw-bold">${p.rejected}</td>
+                </tr>`;
+        });
+        
+        tbody.innerHTML = html;
     }).catch(err => console.error(err));
 }
 

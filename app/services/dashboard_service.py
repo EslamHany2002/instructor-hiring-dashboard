@@ -1,7 +1,7 @@
 from app import db
 from app.models import Instructor, InstructorTrack, Track, Profile, HiringPlan
 from sqlalchemy import func, case, extract
-from app.models import Instructor, InstructorTrack, Track, Profile
+from app.models import Instructor, InstructorTrack, Track, Profile, HiringPlan, PlanTrack
 from datetime import datetime
 
 def get_kpis():
@@ -129,19 +129,22 @@ def get_aging_analysis():
         else: buckets["> 30 Days"] += 1
     return buckets
 
-def get_plans_progress():
-    plans = HiringPlan.query.order_by(HiringPlan.created_at.desc()).limit(5).all()
+def get_plans_progress(plan_id=None):
+    plans = HiringPlan.query.order_by(HiringPlan.created_at.desc())
+    if plan_id:
+        plans = plans.filter_by(id=plan_id)
+        
     result = []
     for plan in plans:
-        # إجمالي المطلوب
         total_target = sum(pt.target_number for pt in plan.plan_tracks)
+        actual_assigned = Instructor.query.filter_by(plan_id=plan.id).count()
         
-        # الفعلي (اللي Approved بس - ده اللي بيملأ الخطة)
-        actual_assigned = Instructor.query.filter_by(plan_id=plan.id, first_approval='Approved').count()
+        total_approved = Instructor.query.filter_by(plan_id=plan.id, first_approval='Approved').count()
+        total_pending = Instructor.query.filter_by(plan_id=plan.id, first_approval='Pending').count()
+        total_rejected = Instructor.query.filter_by(plan_id=plan.id, first_approval='Rejected').count()
         
-        # إحصائيات إضافية عشان نعرضها للادمن
-        pending_count = Instructor.query.filter_by(plan_id=plan.id, first_approval='Pending').count()
-        rejected_count = Instructor.query.filter_by(plan_id=plan.id, first_approval='Rejected').count()
+        # حساب نسبة الـ Approved من الـ Target
+        approved_progress = round((total_approved / total_target) * 100, 1) if total_target > 0 else 0
         
         result.append({
             "id": plan.id,
@@ -151,8 +154,10 @@ def get_plans_progress():
             "actual": actual_assigned,
             "gap": total_target - actual_assigned,
             "percentage": round((actual_assigned / total_target) * 100, 1) if total_target > 0 else 0,
-            "pending": pending_count,
-            "rejected": rejected_count
+            "pending": total_pending,
+            "rejected": total_rejected,
+            "approved": total_approved,
+            "approved_progress": approved_progress # المتغير الجديد
         })
     return result
 
@@ -166,3 +171,48 @@ def get_track_status_distribution():
      .group_by(Track.id).all()
 
     return [{"name": d.name, "new": d.new_count or 0, "current": d.current_count or 0} for d in data]
+
+
+def get_plan_detailed_breakdown(plan_id=None):
+    plans = HiringPlan.query.order_by(HiringPlan.created_at.desc())
+    if plan_id:
+        plans = plans.filter_by(id=plan_id)
+        
+    result = []
+    for plan in plans:
+        plan_requirements = PlanTrack.query.filter_by(plan_id=plan.id).all()
+        for req in plan_requirements:
+            track = Track.query.get(req.track_id)
+            profile = Profile.query.get(req.profile_id) if req.profile_id else None
+            
+            assigned_query = db.session.query(Instructor.id)\
+                .join(InstructorTrack, Instructor.id == InstructorTrack.instructor_id)\
+                .filter(Instructor.plan_id == plan.id)\
+                .filter(InstructorTrack.track_id == req.track_id)
+            if req.profile_id:
+                assigned_query = assigned_query.filter(InstructorTrack.profile_id == req.profile_id)
+            
+            assigned_ids = [row[0] for row in assigned_query.with_entities(Instructor.id).all()]
+            actual_count = len(assigned_ids)
+            
+            approved, pending, rejected = 0, 0, 0
+            if assigned_ids:
+                breakdown = db.session.query(Instructor.first_approval, func.count(Instructor.id))\
+                    .filter(Instructor.id.in_(assigned_ids)).group_by(Instructor.first_approval).all()
+                for status, count in breakdown:
+                    if status == 'Approved': approved = count
+                    elif status == 'Pending': pending = count
+                    elif status == 'Rejected': rejected = count
+            
+            target = req.target_number
+            if actual_count > target: status, status_color = "Over-fulfilled", "success"
+            elif actual_count == target: status, status_color = "Exact", "primary"
+            else: status, status_color = "Under", "danger"
+                
+            result.append({
+                "plan_title": plan.title, "track_name": track.name if track else "Unknown",
+                "profile_name": profile.name if profile else "All Profiles",
+                "target": target, "actual": actual_count, "status": status, "status_color": status_color,
+                "approved": approved, "pending": pending, "rejected": rejected
+            })
+    return result

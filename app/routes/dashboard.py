@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, jsonify, redirect, url_for, flash
+from flask import Blueprint, render_template, jsonify, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.services import dashboard_service
+
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -77,9 +78,16 @@ def api_aging_analysis():
 @dashboard_bp.route('/api/plans-progress')
 @login_required
 def api_plans_progress():
-    return jsonify(dashboard_service.get_plans_progress())
+    plan_id = request.args.get('plan_id', type=int)
+    return jsonify(dashboard_service.get_plans_progress(plan_id))
 
 @dashboard_bp.route('/api/track-status')
 @login_required
 def api_track_status():
     return jsonify(dashboard_service.get_track_status_distribution())
+
+@dashboard_bp.route('/api/plans-detailed-breakdown')
+@login_required
+def api_plans_detailed_breakdown():
+    plan_id = request.args.get('plan_id', type=int)
+    return jsonify(dashboard_service.get_plan_detailed_breakdown(plan_id))

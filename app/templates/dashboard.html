@@ -25,7 +25,10 @@
 <div class="row g-4 mb-4 animate-fade-up delay-2">
     <div class="col-12">
         <div class="card p-4">
-            <h5 class="fw-bold mb-3"><i class="bi bi-clipboard2-check me-2 text-primary"></i>Hiring Plans Progress</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-clipboard2-check me-2 text-primary"></i>Hiring Plans Progress</h5>
+                <a href="{{ url_for('plans.view_progress') }}" class="btn btn-sm btn-accent">View Full Breakdown</a>
+            </div>
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
                     <thead>
@@ -33,21 +36,24 @@
                             <th>Plan Title</th>
                             <th>Period</th>
                             <th class="text-center">Target</th>
-                            <th class="text-center">Fulfilled (Approved)</th>
-                            <th class="text-center">Pending Review</th>
-                            <th class="text-center">Rejected</th>
+                            <th class="text-center">Fulfilled</th>
+                            <th class="text-center text-success">Total Approved</th>
+                            <th class="text-center text-warning">Total Pending</th>
+                            <th class="text-center text-danger">Total Rejected</th>
                             <th class="text-center">Gap</th>
                             <th>Progress</th>
+                            <th style="min-width: 150px;">Approved Progress from Plan</th>
                         </tr>
                     </thead>
                     <tbody id="plans-progress-body">
-                        <tr><td colspan="8" class="text-center text-muted">Loading plans...</td></tr>
+                        <tr><td colspan="10" class="text-center text-muted">Loading plans...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Charts Row 1 -->
 <div class="row g-4 mb-4">
     <div class="col-lg-8 animate-fade-up delay-2">
